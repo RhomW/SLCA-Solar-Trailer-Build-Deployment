@@ -299,6 +299,14 @@
 </head>
 <body>
 
+    
+    <script>
+  const password = prompt("Enter password to access this page:");
+  if (password !== "yourpassword") {
+    document.body.innerHTML = "<h2>Access denied.</h2>";
+  }
+</script>
+
 <header>
     <div class="header-badge">Technical Process Guide</div>
     <h1>Battery Trailer Build &amp; Deployment</h1>
