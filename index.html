@@ -307,13 +307,103 @@
     </style>
 </head>
 <body>
+<style>
+    #password-screen {
+        position: fixed;
+        inset: 0;
+        background: var(--green-deep);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
 
-    
-    <script>
-  const password = prompt("Enter password to access this page:");
-  if (password !== "TAFE2026") {
-    document.body.innerHTML = "<h2>Access denied.</h2>";
-  }
+    #password-box {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+        width: 320px;
+    }
+
+    #password-box h2 {
+        font-family: 'DM Serif Display', serif;
+        color: var(--green-deep);
+        margin-bottom: 8px;
+        border: none;
+    }
+
+    #password-box p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    #password-input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        outline: none;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    #password-input:focus {
+        border-color: var(--green-mid);
+    }
+
+    #password-submit {
+        width: 100%;
+        padding: 10px;
+        background: var(--green-deep);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    #password-submit:hover {
+        background: var(--green-mid);
+    }
+
+    #password-error {
+        color: #E85D04;
+        font-size: 13px;
+        margin-top: 10px;
+        display: none;
+    }
+</style>
+
+<div id="password-screen">
+    <div id="password-box">
+        <h2>Protected Page</h2>
+        <p>Enter the password to continue</p>
+        <input type="password" id="password-input" placeholder="Password" />
+        <button id="password-submit">Enter</button>
+        <div id="password-error">Incorrect password. Please try again.</div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('password-submit').addEventListener('click', function() {
+        const input = document.getElementById('password-input').value;
+        if (input === 'yourpassword') {
+            document.getElementById('password-screen').style.display = 'none';
+        } else {
+            document.getElementById('password-error').style.display = 'block';
+            document.getElementById('password-input').value = '';
+        }
+    });
+
+    document.getElementById('password-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') document.getElementById('password-submit').click();
+    });
 </script>
 
 <header>
