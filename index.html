@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Trailer Build & Deployment Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green-deep: #0B6E4F;
+            --green-mid: #1A9A6C;
+            --green-bright: #21D375;
+            --green-light: #6BBF59;
+            --cream: #F7F5F0;
+            --ink: #1C1C1C;
+            --muted: #6B7280;
+            --border: #E5E1D8;
+            --white: #FFFFFF;
+            --accent: #D4ED88;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--green-deep);
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: var(--green-deep);
+            padding: 60px 40px 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -60px; left: -60px;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(107,191,89,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; right: -40px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(33,211,117,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(107,191,89,0.2);
+            color: var(--green-light);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(107,191,89,0.3);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            color: var(--white);
+            line-height: 1.15;
+            max-width: 700px;
+            margin: 0 auto 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-sub {
+            color: rgba(255,255,255,0.55);
+            font-size: 15px;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+
+        /* Main layout */
+        .page-wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+
+        /* TOC */
+        .toc-card {
+            background: var(--cream);
+            border-radius: 16px;
+            padding: 36px 40px;
+            margin: -20px 0 40px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+        }
+
+        .toc-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 6px;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--ink);
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: background 0.15s, color 0.15s;
+            border: 1px solid transparent;
+        }
+
+        .toc-item:hover {
+            background: var(--white);
+            border-color: var(--border);
+            color: var(--green-deep);
+        }
+
+        .toc-num {
+            width: 22px; height: 22px;
+            background: var(--green-deep);
+            color: var(--white);
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Section cards */
+        .step {
+            background: var(--white);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: box-shadow 0.2s;
+        }
+
+        .step:hover {
+            box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 22px 28px;
+            border-bottom: 1px solid var(--border);
+            background: var(--cream);
+        }
+
+        .step-number {
+            width: 36px; height: 36px;
+            background: var(--green-deep);
+            color: var(--white);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.15rem;
+            color: var(--ink);
+            font-weight: 400;
+        }
+
+        .step-body {
+            padding: 20px 28px 24px;
+        }
+
+        .step-body ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .step-body li a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: var(--green-deep);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.15s;
+            border: 1px solid transparent;
+        }
+
+        .step-body li a::before {
+            content: '';
+            width: 6px; height: 6px;
+            background: var(--green-bright);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .step-body li a[href="#"] {
+            color: var(--muted);
+            cursor: default;
+        }
+
+        .step-body li a[href="#"]::before {
+            background: var(--border);
+        }
+
+        .step-body li a:not([href="#"]):hover {
+            background: #EDF9F4;
+            border-color: rgba(33,211,117,0.25);
+            color: var(--green-deep);
+        }
+
+        /* Sub-sections inside step 10 */
+        .sub-section {
+            margin-top: 16px;
+        }
+
+        .sub-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+            padding-left: 12px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            padding-bottom: 40px;
+        }
+
+        /* Scroll animation */
+        .step {
+            opacity: 0;
+            transform: translateY(18px);
+            animation: fadeUp 0.45s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step:nth-child(1)  { animation-delay: 0.05s; }
+        .step:nth-child(2)  { animation-delay: 0.10s; }
+        .step:nth-child(3)  { animation-delay: 0.15s; }
+        .step:nth-child(4)  { animation-delay: 0.20s; }
+        .step:nth-child(5)  { animation-delay: 0.25s; }
+        .step:nth-child(6)  { animation-delay: 0.30s; }
+        .step:nth-child(7)  { animation-delay: 0.35s; }
+        .step:nth-child(8)  { animation-delay: 0.40s; }
+        .step:nth-child(9)  { animation-delay: 0.45s; }
+        .step:nth-child(10) { animation-delay: 0.50s; }
+        .step:nth-child(11) { animation-delay: 0.55s; }
+        .step:nth-child(12) { animation-delay: 0.60s; }
+        .step:nth-child(13) { animation-delay: 0.65s; }
+        .step:nth-child(14) { animation-delay: 0.70s; }
+
+        @media (max-width: 600px) {
+            header { padding: 44px 24px 40px; }
+            .toc-card { padding: 28px 20px; margin: -16px 0 28px; }
+            .toc-grid { grid-template-columns: 1fr; }
+            .step-header, .step-body { padding-left: 20px; padding-right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-badge">Technical Process Guide</div>
+    <h1>Battery Trailer Build &amp; Deployment</h1>
+    <p class="header-sub">14-step process from sourcing to ongoing monitoring</p>
+</header>
+
+<div class="page-wrap">
+
+    <div class="toc-card">
+        <div class="toc-label">Contents</div>
+        <div class="toc-grid">
+            <a href="#step1"  class="toc-item"><span class="toc-num">1</span>Pre-Reading Sources</a>
+            <a href="#step2"  class="toc-item"><span class="toc-num">2</span>Applicable Standards</a>
+            <a href="#step3"  class="toc-item"><span class="toc-num">3</span>PPE</a>
+            <a href="#step4"  class="toc-item"><span class="toc-num">4</span>Incoming Battery Shipping</a>
+            <a href="#step5"  class="toc-item"><span class="toc-num">5</span>Incoming Battery Inspection &amp; Sorting</a>
+            <a href="#step6"  class="toc-item"><span class="toc-num">6</span>Battery Handling &amp; Storage</a>
+            <a href="#step7"  class="toc-item"><span class="toc-num">7</span>Cell Health Testing (UL1974)</a>
+            <a href="#step8"  class="toc-item"><span class="toc-num">8</span>Battery Disposal Record Form</a>
+            <a href="#step9"  class="toc-item"><span class="toc-num">9</span>Trailer Design &amp; Adaptation</a>
+            <a href="#step10" class="toc-item"><span class="toc-num">10</span>Trailer Build</a>
+            <a href="#step11" class="toc-item"><span class="toc-num">11</span>Module Building</a>
+            <a href="#step12" class="toc-item"><span class="toc-num">12</span>Commissioning / Testing</a>
+            <a href="#step13" class="toc-item"><span class="toc-num">13</span>Deployment &amp; Install</a>
+            <a href="#step14" class="toc-item"><span class="toc-num">14</span>Ongoing Monitoring</a>
+        </div>
+    </div>
+
+    <!-- Steps -->
+    <div class="step" id="step1">
+        <div class="step-header">
+            <div class="step-number">1</div>
+            <div class="step-title">Pre-Reading Sources</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="https://docs.google.com/document/d/1IRKNNXmBDQeFXh7RErKPQIwzXh_hhPGJlacH_b7ra_4/edit?usp=sharing" target="_blank" rel="noopener noreferrer">SLCA Risk Management Plan</a></li>
+                <li><a href="https://cdn.shopify.com/s/files/1/0480/6521/6669/files/BMW_Samsung_SDI_94Ah_Datasheet.pdf?v=1605781107"  rel="noopener noreferrer">Samsung SDI 94Ah Cell Datasheet</a></li>
+                <li><a href="https://www.erac.gov.au/wp-content/uploads/2021/03/Battery_Energy_Storage_System_02Feb2021.pdf" target="_blank" rel="noopener noreferrer">Energy Storage System Design Guides</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step2">
+        <div class="step-header">
+            <div class="step-number">2</div>
+            <div class="step-title">Applicable Standards</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="https://www.ul.com/resources/ul-1974-creating-safe-second-life-electric-vehicle-batteries" target="_blank" rel="noopener noreferrer">UL1974 – Evaluation for Repurposing Batteries</a></li>
+                <li><a href="https://www.iecee.org/certification/iec-standards/iec-626192022" target="_blank" rel="noopener noreferrer">IEC 62619 – Lithium Battery Safety</a></li>
+                <li><a href="https://www.worksafe.qld.gov.au/__data/assets/pdf_file/0019/18343/es-code-of-practice-works.pdf" target="_blank" rel="noopener noreferrer">Electrical Safety Code of Practice 2020</a></li>
+                <li><a href="https://store.standards.org.au/product/as-nzs-3000-2018" target="_blank" rel="noopener noreferrer">AS/NZS 3000 - Australian/New Zealand Wiring Standards</a></li>
+                <li><a href="https://store.standards.org.au/product/as-nzs-5139-2019" target="_blank" rel="noopener noreferrer">AS/NZS 5139 - Electrical installations – Safety of battery systems for use with power conversion equipment</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step3">
+        <div class="step-header">
+            <div class="step-number">3</div>
+            <div class="step-title">PPE</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="https://www.worksafe.qld.gov.au/__data/assets/pdf_file/0025/72637/managing-electrical-risks-in-the-workplace-cop-2021.pdf" target="_blank" rel="noopener noreferrer">Electrical Safety PPE Requirements</a></li>
+                <li><a href="#">Battery Handling PPE Guide</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step4">
+        <div class="step-header">
+            <div class="step-number">4</div>
+            <div class="step-title">Incoming Battery Shipping</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="https://www.legislation.qld.gov.au/view/html/inforce/current/sl-2018-0107" target="_blank" rel="noopener noreferrer">Transport Operations - Dangerous Goods Act</a></li>
+                <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSchYTQQcy3eyQW4uNIG78Lfq8o4DkRmJUUfZCNcLdmnGEiU1g/viewform?usp=header" target="_blank" rel="noopener noreferrer">SLCA Receiving Procedure Checklist</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step5">
+        <div class="step-header">
+            <div class="step-number">5</div>
+            <div class="step-title">Incoming Battery Inspection and Sorting</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="https://docs.google.com/document/d/1VqpaCX2ngcOZE8P74Z8DRXjZu-ULHPTS8ooAdPG6Sgg/edit?usp=sharing"  target="_blank" rel="noopener noreferrer">SLCA Inspection Checklist</a></li>
+                <li><a href="#">Sorting by Voltage / Condition</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step6">
+        <div class="step-header">
+            <div class="step-number">6</div>
+            <div class="step-title">Battery Handling and Storage</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="https://www.energy.nsw.gov.au/sites/default/files/2022-08/2021_08_NSW_TechGuide_BatteryStorageGuide.pdf" target="_blank" rel="noopener noreferrer">NSW Battery Storage Guide</a></li>
+                <li><a href="#">Temperature and Fire Safety Guidelines</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step7">
+        <div class="step-header">
+            <div class="step-number">7</div>
+            <div class="step-title">Cell Health Testing (UL1974)</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="https://docs.google.com/document/d/1G-3a0_DrJAlNPtUnfVge-DyDtX5-_pn6/edit?usp=sharing&ouid=109271423265993679287&rtpof=true&sd=true" target="_blank" rel="noopener noreferrer">SLCA UL1974 Evaluation Process</a></li>
+                <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSdcEDVM-NRlvSjHx75ePuxwY2vdeGISXhnnpWm7L6ZourNB_g/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer">Public EV Module Testing</a></li>
+                <li><a href="#">Workflow Crossroad: Leave BMS Attached or Assign New During Assembly</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step8">
+        <div class="step-header">
+            <div class="step-number">8</div>
+            <div class="step-title">Battery Disposal Record Form</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSfA3BU89LmVf4Ll1-ZkKPDlOISj-T05cchBlVfaQ2OLB7TNgQ/viewform?usp=publish-editor"  target="_blank" rel="noopener noreferrer">Disposal Documentation Form</a></li>
+                <li><a href="#">Hazardous Waste Compliance</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step9">
+        <div class="step-header">
+            <div class="step-number">9</div>
+            <div class="step-title">Trailer Design / Adaptation</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="#">Trailer Design and Procurement Guide</a></li>
+                <li><a href="#">Battery Enclosure Design and Procurement</a></li>
+                <li><a href="#">Enclosure Size and Configuration Calculator</a></li>
+            </ul>
+        </div>
+    </div>
+
+  <div class="step" id="step10">
+        <div class="step-header">
+            <div class="step-number">10</div>
+            <div class="step-title">Module Building</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="https://docs.google.com/document/d/1MGTZ72RYSnKFOFr5VTU7u5pxQDzWvhSW0lnFiNDoWD0/edit?usp=sharing"  target="_blank" rel="noopener noreferrer">BMS Connection Procedure and Checklist for BMW i3 Battery</a></li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="step" id="step11">
+        <div class="step-header">
+            <div class="step-number">11</div>
+            <div class="step-title">Trailer Build</div>
+        </div>
+        <div class="step-body">
+            <div class="sub-section">
+                <div class="sub-label">Hardware Install (Inverter)</div>
+                <ul><li><a href="https://www.deyeinverter.com/deyeinverter/2021/02/06/502012021%E3%80%90b%E3%80%91%E5%82%A8%E8%83%BD%E5%8D%95%E7%9B%B8%E8%AF%B4%E6%98%8E%E4%B9%A6sun-3.6-5k-sg03lp1-eu-ver2.0-deye.pdf"  target="_blank" rel="noopener noreferrer">Deye Inverter installation Manual</a></li></ul>
+                <ul><li><a href="https://www.victronenergy.com/upload/documents/Quick-Install-Guide-MultiPlus-II-48V-3000VA-120Vac-EN.pdf"  target="_blank" rel="noopener noreferrer">Victron Inverter installation Manual</a></li></ul>
+
+            </div>
+            <div class="sub-section">
+                <div class="sub-label">Battery Install</div>
+                <ul><li><a href="#">Battery Module to Trailer Mounting Guide</a></li></ul>
+            </div>
+            <div class="sub-section">
+                <div class="sub-label">Solar Install</div>
+                <ul><li><a href="#">Solar Panel Mounting Guide</a></li></ul>
+            </div>
+            <div class="sub-section">
+                <div class="sub-label">Hardware & Electrical Connections</div>
+                <ul>
+                    <li><a href="https://www.victronenergy.com/media/pg/The_Wiring_Unlimited_book/en/dc-wiring.html"  target="_blank" rel="noopener noreferrer" >Victron: DC Wiring Standards</a></li>
+                    <li><a href="https://www.victronenergy.com/media/pg/The_Wiring_Unlimited_book/en/ground,-earth-and-electrical-safety.html"  target="_blank" rel="noopener noreferrer">Victron: Grounding, earth and electrial safety</a></li>
+                </ul>
+            </div>
+            <div class="sub-section">
+                <div class="sub-label">IP Testing</div>
+                <ul><li><a href="https://webstore.iec.ch/en/publication/2452"  target="_blank" rel="noopener noreferrer">IEC 60529: Ingress Protection and Testing</a></li></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="step" id="step12">
+        <div class="step-header">
+            <div class="step-number">12</div>
+            <div class="step-title">Commissioning / Testing (In-House)</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="#">System Commissioning Checklist</a></li>
+                <li><a href="#">Battery System Testing Procedure</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step13">
+        <div class="step-header">
+            <div class="step-number">13</div>
+            <div class="step-title">Deployment and Install</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="#">Site Installation Procedure</a></li>
+                <li><a href="#">Final Safety Verification</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step" id="step14">
+        <div class="step-header">
+            <div class="step-number">14</div>
+            <div class="step-title">Ongoing Monitoring</div>
+        </div>
+        <div class="step-body">
+            <ul>
+                <li><a href="#">Remote Monitoring Platform</a></li>
+                <li><a href="#">Maintenance Schedule</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>Battery Trailer Build &amp; Deployment Process</footer>
+
+</div>
+</body>
+</html>
